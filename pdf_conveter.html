@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hussain PDF & Word Converter</title>
+    <!-- AOS Animation CSS -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #030712;
+            color: #f8fafc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(to right, #60a5fa, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #94a3b8;
+        }
+
+        /* Tool Container */
+        .converter-box {
+            background: #1e293b;
+            width: 100%;
+            max-width: 600px;
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Tool Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            background: #0f172a;
+            padding: 6px;
+            border-radius: 10px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Upload Area */
+        .upload-area {
+            border: 2px dashed #334155;
+            padding: 30px;
+            text-align: center;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: border-color 0.3s, background 0.3s;
+            background: #0f172a;
+        }
+
+        .upload-area:hover {
+            border-color: #60a5fa;
+            background: #111827;
+        }
+
+        .upload-area p {
+            color: #94a3b8;
+            margin-top: 10px;
+            font-size: 0.95rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Action Button */
+        .convert-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .convert-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Status / Result */
+        .result-box {
+            text-align: center;
+            color: #4ade80;
+            font-weight: 500;
+            display: none;
+        }
+
+        footer {
+            margin-top: 50px;
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header data-aos="fade-down" data-aos-duration="1000">
+        <h1>Hussain Document Suite</h1>
+        <p>Convert PDF, Word, and Images instantly with sleek animations</p>
+    </header>
+
+    <div class="converter-box" data-aos="zoom-in" data-aos-duration="800">
+        <!-- Feature Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="pdfToWord">PDF to Word</button>
+            <button class="tab-btn" data-tab="wordToPdf">Word to PDF</button>
+            <button class="tab-btn" data-tab="imgToPdf">Image to PDF</button>
+        </div>
+
+        <!-- File Upload Section -->
+        <div class="upload-area" id="uploadArea">
+            <span style="font-size: 40px;">📁</span>
+            <p id="uploadText">Drag & drop your PDF file here, or click to browse</p>
+            <input type="file" id="fileInput" class="file-input" accept=".pdf">
+        </div>
+
+        <!-- Convert Button -->
+        <button class="convert-btn" id="convertBtn">Convert File</button>
+
+        <div class="result-box" id="resultBox">
+            ✨ File converted successfully! Downloading...
+        </div>
+    </div>
+
+    <footer data-aos="fade-in">
+        <p>&copy; 2026 Hussain Akhtar. All rights reserved.</p>
+    </footer>
+
+    <!-- AOS JS -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init();
+
+        const tabs = document.querySelectorAll('.tab-btn');
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadText = document.getElementById('uploadText');
+        const convertBtn = document.getElementById('convertBtn');
+        const resultBox = document.getElementById('resultBox');
+
+        let currentMode = 'pdfToWord';
+
+        // Tab switching logic
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentMode = tab.getAttribute('data-tab');
+
+                // Update accepted file formats based on tab
+                if (currentMode === 'pdfToWord') {
+                    fileInput.accept = '.pdf';
+                    uploadText.textContent = 'Drag & drop your PDF file here, or click to browse';
+                } else if (currentMode === 'wordToPdf') {
+                    fileInput.accept = '.docx, .doc';
+                    uploadText.textContent = 'Drag & drop your Word (.docx) file here, or click to browse';
+                } else if (currentMode === 'imgToPdf') {
+                    fileInput.accept = 'image/*';
+                    uploadText.textContent = 'Drag & drop images here to convert into PDF';
+                }
+                resultBox.style.display = 'none';
+            });
+        });
+
+        // Trigger file selection on click
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                uploadText.textContent = `Selected: ${e.target.files[0].name}`;
+            }
+        });
+
+        // Conversion simulator action
+        convertBtn.addEventListener('click', () => {
+            if (fileInput.files.length === 0) {
+                alert('Pehle koi file select karein!');
+                return;
+            }
+
+            convertBtn.textContent = 'Processing...';
+            setTimeout(() => {
+                convertBtn.textContent = 'Convert File';
+                resultBox.style.display = 'block';
+            }, 1500);
+        });
+    </script>
+
+</body>
+</html>
